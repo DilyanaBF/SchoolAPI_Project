@@ -26,7 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Tests\BBDTests\Teacher.feature.cs">
+    <Compile Update="Tests\BBDTests\Features\Teacher.feature.cs">
       <Visible>true</Visible>
       <DependentUpon>Teacher.feature</DependentUpon>
       <DesignTime>true</DesignTime>
@@ -41,7 +41,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ReqnrollFeatureFiles Update="Tests\BBDTests\Teacher.feature">
+    <ReqnrollFeatureFiles Update="Tests\BBDTests\Features\Teacher.feature">
       <Visible>$(UsingMicrosoftNETSdk)</Visible>
       <CodeBehindFile>%(RelativeDir)%(Filename).feature$(DefaultLanguageSourceExtension)</CodeBehindFile>
     </ReqnrollFeatureFiles>

@@ -11,15 +11,15 @@ using NLog;
 using OpenQA.Selenium.BiDi.Modules.Network;
 
 
-namespace SchoolAPI_TestProject.Tests.BBDTests
+namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
 {
     [Binding]
     public class TeacherStepDefinitions
     {
-       // private readonly ScenarioContext _context;
-       // private readonly HttpClient _client;
-       // private string? _authToken;
-       // private string? _classId;
+        // private readonly ScenarioContext _context;
+        // private readonly HttpClient _client;
+        // private string? _authToken;
+        // private string? _classId;
 
         private RestCalls restCalls = new RestCalls();
         private ResponseDataExtractors extractResponseData = new ResponseDataExtractors();
@@ -82,16 +82,16 @@ namespace SchoolAPI_TestProject.Tests.BBDTests
                 LogAndReportHelper.Fail($"Expected HTTP 200 but got {statusCode}.", _test, logger);
             }
 
-           if (responseContent.Contains("\"message\":\"Class created\"") && responseContent.Contains("\"class_id\":"))
+            if (responseContent.Contains("\"message\":\"Class created\"") && responseContent.Contains("\"class_id\":"))
             {
 
                 LogAndReportHelper.Success("Class was created successfully", _test, logger);
             }
             else
             {
-                
+
                 string detail = extractResponseData.ExtractResponseDetail(responseContent, "detail");
-                
+
                 if (string.IsNullOrEmpty(detail))
                 {
                     detail = "No detail message returned.";

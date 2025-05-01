@@ -11,7 +11,7 @@ using SchoolAPI_TestProject.Utilities;
 using NLog;
 
 
-namespace SchoolAPI_TestProject.Tests.BBDTests
+namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
 {
     [Binding]
     public class ParentStepDefinitions
@@ -72,7 +72,7 @@ namespace SchoolAPI_TestProject.Tests.BBDTests
         public void GetGrades()
         {
             string userToken = _scenarioContext.Get<string>("UserToken");
-            
+
             RestResponse response = restCalls.GeneralRestCall(
                 endpoint: "grades/student/43bac5dc-ecba-4826-8b8d-204cecd07b18",
                 method: Method.Get,
@@ -126,7 +126,7 @@ namespace SchoolAPI_TestProject.Tests.BBDTests
         [When(@"a parent checks not own child grades")]
         public void GetGradesForotherChild()
         {
-   
+
 
             string userToken = _scenarioContext.Get<string>("UserToken");
 
@@ -215,18 +215,18 @@ namespace SchoolAPI_TestProject.Tests.BBDTests
                 // Fail explicitly if grades exist (just in case!)
                 if (json["grades"] != null)
                 {
-                    ClassicAssert.Fail("Grades array was unexpectedly returned in the response.");
+                    NUnit.Framework.Assert.Fail("Grades array was unexpectedly returned in the response.");
                 }
 
                 Console.WriteLine("✅ Correctly blocked access to student grades with 403 and proper message.");
             }
             catch (JsonException ex)
             {
-                ClassicAssert.Fail($"Invalid JSON returned: {ex.Message}\nContent: {response}");
+                NUnit.Framework.Assert.Fail($"Invalid JSON returned: {ex.Message}\nContent: {response}");
             }
             catch (Exception ex)
             {
-                ClassicAssert.Fail($"Unexpected error: {ex.Message}\nContent: {response}");
+                NUnit.Framework.Assert.Fail($"Unexpected error: {ex.Message}\nContent: {response}");
             }
         }
 

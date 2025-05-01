@@ -12,7 +12,7 @@ using NLog;
 using OpenQA.Selenium;
 
 
-namespace SchoolAPI_TestProject.Tests.BBDTests
+namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
 {
     [Binding]
     public class LoginStepDefinitions
@@ -52,13 +52,13 @@ namespace SchoolAPI_TestProject.Tests.BBDTests
             string tokenValue = extractResponseData.ExtractLoggedInUserToken(response.Content, "access_token");
             string detail = extractResponseData.ExtractResponseDetail(response.Content, "detail");
             string fullResponse = extractResponseData.ExtractFullResponse(response.Content);
-            
+
 
             _scenarioContext.Add("FullResponse", fullResponse);
             _scenarioContext.Add("UserToken", tokenValue);
             _scenarioContext.Add("StatusCode", statusCode);
 
-            
+
         }
 
         [Then(@"user is logged in successfully")]
@@ -146,7 +146,7 @@ namespace SchoolAPI_TestProject.Tests.BBDTests
 
                 return;
             }
-            if(loginStatusCode == 401)
+            if (loginStatusCode == 401)
             {
 
                 LogAndReportHelper.Success($"User was not logged in successfully." +
@@ -154,8 +154,8 @@ namespace SchoolAPI_TestProject.Tests.BBDTests
                     _test,
                     logger);
             }
-            
-            
+
+
         }
     }
 }
