@@ -10,7 +10,7 @@
 // ------------------------------------------------------------------------------
 #region Designer generated code
 #pragma warning disable
-namespace SchoolAPI_TestProject.Tests.BBDTests
+namespace SchoolAPI_TestProject.Tests.BBDTests.Features
 {
     using Reqnroll;
     using System;
@@ -28,7 +28,7 @@ namespace SchoolAPI_TestProject.Tests.BBDTests
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Tests/BBDTests", "Parent", "As a parent I want to be able to check my children grades.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new System.Globalization.CultureInfo("en-US"), "Tests/BBDTests/Features", "Parent", "As a parent I want to be able to check my children grades.", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         
 #line 1 "Parent.feature"
 #line hidden
