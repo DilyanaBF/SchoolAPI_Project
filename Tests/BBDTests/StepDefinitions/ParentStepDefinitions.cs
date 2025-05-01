@@ -5,8 +5,6 @@ using Newtonsoft.Json;
 using Reqnroll;
 using RestSharp;
 using Newtonsoft.Json.Linq;
-using NUnit.Framework.Legacy;
-using System.Net;
 using SchoolAPI_TestProject.Utilities;
 using NLog;
 
@@ -47,6 +45,7 @@ namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
             );
 
             int statusCode = extractResponseData.ExtractHttpStatusCode(response);
+            LogAndReportHelper.AssertHttpOkOrFail(statusCode, _test, logger);
             string tokenValue = extractResponseData.ExtractLoggedInUserToken(response.Content, "access_token");
             string detail = extractResponseData.ExtractResponseDetail(response.Content, "detail");
 
@@ -80,6 +79,7 @@ namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
             );
 
             int gradesStatusCode = extractResponseData.ExtractHttpStatusCode(response);
+            LogAndReportHelper.AssertHttpOkOrFail(gradesStatusCode, _test, logger);
             _scenarioContext.Add("gradesResponse", response.Content);
             _scenarioContext.Add("gradesResponsCode", gradesStatusCode);
 
@@ -87,15 +87,13 @@ namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
         [Then(@"validate student grades response is successful")]
         public void ValidateStudentGradesResponse2()
         {
-            // Get response status and body from scenario context
+
             int statusCode = _scenarioContext.Get<int>("gradesResponsCode");
             string responseContent = _scenarioContext.Get<string>("gradesResponse");
 
-            // Always log the raw response
             _test.Info("Response content: " + responseContent);
             logger.Info("Response content: " + responseContent);
 
-            // Fail if status code is not 200
             if (statusCode != 200)
             {
                 LogAndReportHelper.Fail($"Expected HTTP 200 but got {statusCode}.", _test, logger);
@@ -103,10 +101,8 @@ namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
 
             try
             {
-                // Parse the response body
                 var json = JObject.Parse(responseContent);
 
-                // Check for the "grades" array
                 var gradesArray = json["grades"] as JArray;
                 if (gradesArray == null)
                 {
@@ -118,7 +114,6 @@ namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
             }
             catch (Exception ex)
             {
-                // Unexpected error in JSON parsing or logic — not a validation failure
                 LogAndReportHelper.Fail($"Unexpected error during response validation: {ex.Message}", _test, logger);
             }
         }
@@ -139,23 +134,22 @@ namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
             int noGradesStatusCode = extractResponseData.ExtractHttpStatusCode(response);
             _scenarioContext.Add("noGradesResponse", response.Content);
             _scenarioContext.Add("noGradesResponsCode", noGradesStatusCode);
+           
 
         }
 
         [Then(@"the parent is forbidden from accessing another student's grades")]
         public void ValidateParentCannotAccessOtherStudentGrades()
         {
-            // Get response status and body from scenario context
+
             int statusCode = _scenarioContext.Get<int>("noGradesResponsCode");
             string responseContent = _scenarioContext.Get<string>("noGradesResponse");
 
-            // Always log the raw response
             _test.Info("Response status: " + statusCode);
             logger.Info("Response status: " + statusCode);
             _test.Info("Response content: " + responseContent);
             logger.Info("Response content: " + responseContent);
 
-            // Validate status code
             if (statusCode != 403)
             {
                 LogAndReportHelper.Fail($"Expected HTTP 403 but got {statusCode}.", _test, logger);
@@ -163,7 +157,6 @@ namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
 
             try
             {
-                // Parse and validate error detail
                 var json = JObject.Parse(responseContent);
                 var detailMessage = json["detail"]?.ToString();
 
@@ -200,19 +193,16 @@ namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
 
             try
             {
-                // Check status code first
-                //int statusCode = (int)noGradesResponseCode.StatusCode;
+
                 LogAndReportHelper.AssertEqual(403, responseStatusCode, $"Expected 403 Forbidden, but got {responseStatusCode}.", _test, logger);
 
                 var json = JObject.Parse(response);
 
-                // Ensure the detail message is exactly what we expect
                 string? detail = json["detail"]?.ToString();
 
                 LogAndReportHelper.AssertNotNull(detail, "Expected 'detail' in the response but it was missing.", _test, logger);
                 LogAndReportHelper.AssertEqualString("You can't view this student's grades", detail, $"Unexpected detail message: {detail}", _test, logger);
 
-                // Fail explicitly if grades exist (just in case!)
                 if (json["grades"] != null)
                 {
                     NUnit.Framework.Assert.Fail("Grades array was unexpectedly returned in the response.");
@@ -229,8 +219,5 @@ namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
                 NUnit.Framework.Assert.Fail($"Unexpected error: {ex.Message}\nContent: {response}");
             }
         }
-
-
-
     }
 }

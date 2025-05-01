@@ -1,14 +1,13 @@
 ﻿using AventStack.ExtentReports;
 using SchoolAPI_TestProject.Rest.Calls;
 using SchoolAPI_TestProject.Rest.DataManagement;
-using Newtonsoft.Json;
 using Reqnroll;
 using RestSharp;
 using Newtonsoft.Json.Linq;
 using System.Net;
 using SchoolAPI_TestProject.Utilities;
 using NLog;
-using OpenQA.Selenium.BiDi.Modules.Network;
+
 
 
 namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
@@ -16,10 +15,6 @@ namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
     [Binding]
     public class TeacherStepDefinitions
     {
-        // private readonly ScenarioContext _context;
-        // private readonly HttpClient _client;
-        // private string? _authToken;
-        // private string? _classId;
 
         private RestCalls restCalls = new RestCalls();
         private ResponseDataExtractors extractResponseData = new ResponseDataExtractors();
@@ -38,9 +33,11 @@ namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
         public void Login(string username, string password)
         {
             RestResponse response = restCalls.LoginSchoolAPI(username, password);
+            int statusCode = extractResponseData.ExtractHttpStatusCode(response);
+            LogAndReportHelper.AssertHttpOkOrFail(statusCode, _test, logger);
             string tokenValue = extractResponseData.ExtractLoggedInUserToken(response.Content, "access_token");
             string detail = extractResponseData.ExtractResponseDetail(response.Content, "detail");
-            int statusCode = extractResponseData.ExtractHttpStatusCode(response);
+            
 
             _scenarioContext.Add("FullResponse", response.Content);
             _scenarioContext.Add("UserToken", tokenValue);
@@ -58,31 +55,33 @@ namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
                 return;
             }
 
-            // Call the API and store the full response
             RestResponse response = restCalls.CreateClassWithSubjects(class_name, subject_1, subject_2, subject_3, userToken);
 
-            _scenarioContext["classResponseCode"] = (int)response.StatusCode;
-            _scenarioContext["classResponseBody"] = response.Content;
+            int classResponseCode = extractResponseData.ExtractHttpStatusCode(response);
+            LogAndReportHelper.AssertHttpOkOrFail(classResponseCode, _test, logger);
+            string classResponseBody = extractResponseData.ExtractFullResponse(response.Content);
+            _scenarioContext.Add("classResponseBody", classResponseBody);
 
         }
 
-        [Then(@"validate class creation response1")]
-        public void ValidateClassCreationResponse1()
+        [Then(@"validate class creation response")]
+        public void ValidateClassCreationResponse()
         {
             int statusCode = _scenarioContext.Get<int>("classResponseCode");
-            string responseContent = _scenarioContext.Get<string>("classResponseBody");
+            string responseContent = _scenarioContext.ContainsKey("classResponseBody")
+                ? _scenarioContext.Get<string>("classResponseBody")
+                : "No full response found.";
 
-            // Always log raw response
             _test.Info("Response content: " + responseContent);
             logger.Info("Response content: " + responseContent);
 
-            // Validate status code
             if (statusCode != 200)
             {
                 LogAndReportHelper.Fail($"Expected HTTP 200 but got {statusCode}.", _test, logger);
+                return;
             }
 
-            if (responseContent.Contains("\"message\":\"Class created\"") && responseContent.Contains("\"class_id\":"))
+            else if (responseContent.Contains("\"message\": \"Class created\"") && responseContent.Contains("\"class_id\":"))
             {
 
                 LogAndReportHelper.Success("Class was created successfully", _test, logger);
@@ -106,11 +105,10 @@ namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
         {
             string userToken = _scenarioContext.Get<string>("UserToken");
 
-            // Student details
             var queryParams = new Dictionary<string, string>
             {
                 { "name", "Ivo"},
-                { "class_id", "ecadac35-dd50-4120-b876-411ec0d51cd9" }
+                { "class_id", "8ae59179-2c90-4c81-92f0-aeeaec526cfb" }
             };
 
             RestResponse response = restCalls.GeneralRestCall(
@@ -119,17 +117,26 @@ namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
                 queryParams: queryParams,
                 bearerToken: userToken
             );
+            int statusCode = extractResponseData.ExtractHttpStatusCode(response);
+            LogAndReportHelper.AssertHttpOkOrFail(statusCode, _test, logger);
 
-            // Store the response for later validation
             _scenarioContext.Add("StudentResponse", response.Content);
+            _scenarioContext.Add("studentResponseCode", statusCode);
         }
 
         [Then(@"validate student is added")]
         public void ValidateStudentAdded()
         {
             string responseContent = _scenarioContext.Get<string>("StudentResponse");
+            int studentResponseCode = _scenarioContext.Get<int>("studentResponseCode");
 
-            if (responseContent.Contains("\"message\":\"Student added\"") && responseContent.Contains("\"student_id\":"))
+            if (studentResponseCode != 200)
+            {
+                LogAndReportHelper.Fail($"Expected HTTP 200 but got {studentResponseCode}.", _test, logger);
+                return;
+            }
+
+            else if (responseContent.Contains("\"message\":\"Student added\"") && responseContent.Contains("\"student_id\":"))
             {
 
                 LogAndReportHelper.Success("Student was added successfully", _test, logger);
@@ -168,7 +175,6 @@ namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
                 bearerToken: userToken
             );
 
-            // Store the response for later validation
             _scenarioContext.Add("addGradeResponse", response.Content);
         }
 
@@ -177,17 +183,15 @@ namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
         {
             string responseContent = _scenarioContext.Get<string>("addGradeResponse");
 
-            // Check for success response
             if (responseContent.Contains("\"message\":\"Grade updated\""))
             {
 
-                LogAndReportHelper.Success("Grade was added successfully", _test, logger);
+                LogAndReportHelper.Success("Grade was updated successfully", _test, logger);
             }
             else
             {
-                // In case of failure, extract the detail and status code
                 string detail = extractResponseData.ExtractResponseDetail(responseContent, "detail");
-                int statusCode = (int)HttpStatusCode.BadRequest; // You might want to extract actual status from the response
+                int statusCode = (int)HttpStatusCode.BadRequest; 
 
                 if (string.IsNullOrEmpty(detail))
                 {
@@ -213,39 +217,8 @@ namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
             _scenarioContext.Add("message", responseMessage);
             _scenarioContext.Add("detail", responseDetail);
             _scenarioContext.Add("classId", classId);
-            _scenarioContext.Add("classFullResponse", response.Content); // Add full response for debugging
+            _scenarioContext.Add("classFullResponse", response.Content); 
 
-        }
-
-
-        [Then(@"validate class creation response2")]
-        public void ValidateClassCreationResponse2()
-        {
-            try
-            {
-                //int statusCode = _scenarioContext.Get<int>("statusCode");
-                string classFullResponse = _scenarioContext.Get<string>("classFullResponse");
-                //string latestFullResponse = _scenarioContext.Get<string>("latestFullResponse");
-
-                JObject json = JObject.Parse(classFullResponse);
-                string classId = json["class_id"]?.ToString();
-                string message = json["message"]?.ToString();
-
-                //LogAndReportHelper.Info($"🌐 HTTP Status Code: {statusCode}", _test, logger);
-                //LogAndReportHelper.Info($"📦 Full Response: {fullResponse}", _test, logger);
-
-                // Assertions
-                //LogAndReportHelper.AssertEqual(200, statusCode, "Expected HTTP status code 200 (OK).", _test, logger);
-                LogAndReportHelper.AssertFalse(string.IsNullOrEmpty(classId), "Expected a non-empty 'class_id' in response.", _test, logger);
-                LogAndReportHelper.AssertEqualString("Class created", message, "Expected message 'Class created' in response.", _test, logger);
-
-                LogAndReportHelper.Success($"✅ Class successfully created with ID: {classId}", _test, logger);
-            }
-            catch (Exception ex)
-            {
-                LogAndReportHelper.LogException("An error occurred while validating the class creation response.", ex, _test, logger);
-                throw;
-            }
         }
 
     }

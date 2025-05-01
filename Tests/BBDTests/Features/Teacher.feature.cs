@@ -106,7 +106,7 @@ this.ScenarioInitialize(scenarioInfo);
                         "e\" subject_2, \"History\" subject_3", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 8
-  await testRunner.ThenAsync("validate class creation response1", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+  await testRunner.ThenAsync("validate class creation response", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

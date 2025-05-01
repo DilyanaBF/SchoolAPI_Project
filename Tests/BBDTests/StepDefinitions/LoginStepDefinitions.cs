@@ -1,15 +1,12 @@
 ﻿using AventStack.ExtentReports;
 using SchoolAPI_TestProject.Rest.Calls;
 using SchoolAPI_TestProject.Rest.DataManagement;
-using Newtonsoft.Json;
 using Reqnroll;
 using RestSharp;
-using Newtonsoft.Json.Linq;
-using NUnit.Framework.Legacy;
-using System.Net;
 using SchoolAPI_TestProject.Utilities;
 using NLog;
-using OpenQA.Selenium;
+using OpenQA.Selenium.BiDi.Modules.Network;
+
 
 
 namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
@@ -49,6 +46,7 @@ namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
 
 
             int statusCode = extractResponseData.ExtractHttpStatusCode(response);
+            LogAndReportHelper.AssertHttpOkOrFail(statusCode, _test, logger);
             string tokenValue = extractResponseData.ExtractLoggedInUserToken(response.Content, "access_token");
             string detail = extractResponseData.ExtractResponseDetail(response.Content, "detail");
             string fullResponse = extractResponseData.ExtractFullResponse(response.Content);
@@ -109,14 +107,10 @@ namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
             int statusCode = extractResponseData.ExtractHttpStatusCode(response);
             string tokenValue = extractResponseData.ExtractLoggedInUserToken(response.Content, "access_token");
             string detail = extractResponseData.ExtractResponseDetail(response.Content, "detail");
-            //string fullResponse = _scenarioContext.ContainsKey("FullResponse")
-            //    ? _scenarioContext.Get<string>("FullResponse")
-            //    : "No full response found.";
             string fullResponse = extractResponseData.ExtractFullResponse(response.Content);
 
 
             _scenarioContext.Add("FullResponse", fullResponse);
-            //_scenarioContext.Add("FullResponse", fullResponse);
             _scenarioContext.Add("UserToken", tokenValue);
             _scenarioContext.Add("StatusCode", statusCode);
 
@@ -154,7 +148,6 @@ namespace SchoolAPI_TestProject.Tests.BBDTests.StepDefinitions
                     _test,
                     logger);
             }
-
 
         }
     }

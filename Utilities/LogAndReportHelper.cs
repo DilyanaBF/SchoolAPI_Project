@@ -83,5 +83,16 @@ namespace SchoolAPI_TestProject.Utilities
             }
             ClassicAssert.IsNotNull(actual, message);
         }
+
+        public static void AssertHttpOkOrFail(int statusCode, ExtentTest test, ILogger logger)
+        {
+            if (statusCode != 200)
+            {
+                string msg = $"❌ Expected HTTP 200 but got {statusCode}.";
+                test?.Fail(msg);
+                logger?.Error(msg);
+                Assert.Fail(msg);
+            }
+        }
     }
 }
