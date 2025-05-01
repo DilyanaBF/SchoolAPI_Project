@@ -18,7 +18,7 @@ namespace SchoolAPI_TestProject.Rest.Calls
             object? jsonBody = null,
             Dictionary<string, string>? headers = null,
             string? bearerToken = null,
-            string contentType = "application/json" // can be changed to form-url-encoded if needed
+            string contentType = "application/json" 
         )
         {
             var options = new RestClientOptions(baseUrl)
@@ -29,7 +29,6 @@ namespace SchoolAPI_TestProject.Rest.Calls
             var client = new RestClient(options);
             var request = new RestRequest(endpoint, method);
 
-            // Add query parameters to the URL (e.g., ?key=value)
             if (queryParams != null)
             {
                 foreach (var param in queryParams)
@@ -38,7 +37,6 @@ namespace SchoolAPI_TestProject.Rest.Calls
                 }
             }
 
-            // Set headers
             if (!string.IsNullOrEmpty(contentType))
             {
                 request.AddHeader("Content-Type", contentType);
@@ -57,7 +55,6 @@ namespace SchoolAPI_TestProject.Rest.Calls
                 request.AddHeader("Authorization", $"Bearer {bearerToken}");
             }
 
-            // Handle request body (form or JSON)
             if (method == Method.Post || method == Method.Put)
             {
                 if (formParams != null && contentType == "application/x-www-form-urlencoded")
