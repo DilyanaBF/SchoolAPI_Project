@@ -22,11 +22,7 @@ jobs:
           dotnet-version: '8.0'
 
       - name: Restore dependencies
-	    run: |
-          cd .\SchoolAPI_TestProject\
         run: dotnet restore
 
       - name: Build project
-	    run: |
-          cd .\SchoolAPI_TestProject\
         run: dotnet build --no-restore --configuration Release
